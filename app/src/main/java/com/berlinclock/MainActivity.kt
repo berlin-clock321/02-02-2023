@@ -21,6 +21,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.berlinclock.ui.BoxColor
+import com.berlinclock.ui.constants.AppConstant.BIG_BOX_COUNT
+import com.berlinclock.ui.constants.AppConstant.BIG_BOX_SPACE
+import com.berlinclock.ui.constants.AppConstant.BOX_HEIGHT
+import com.berlinclock.ui.constants.AppConstant.BOX_PADDING
+import com.berlinclock.ui.constants.AppConstant.CIRCLE_BOX
+import com.berlinclock.ui.constants.AppConstant.CIRCLE_DIA
+import com.berlinclock.ui.constants.AppConstant.DIGITAL_CLOCK_FORMAT
+import com.berlinclock.ui.constants.AppConstant.OUTER_RECTANGLE_WIDTH
+import com.berlinclock.ui.constants.AppConstant.SCREEN_PADDING
+import com.berlinclock.ui.constants.AppConstant.SMALL_BOX_COUNT
+import com.berlinclock.ui.constants.AppConstant.SMALL_BOX_SPACE
 import com.berlinclock.ui.theme.BerlinClockTheme
 import com.berlinclock.ui.viewModel.MainViewModel
 
@@ -48,50 +59,61 @@ class MainActivity : ComponentActivity() {
 fun MainLayout(viewModel: MainViewModel) {
     Column(
         Modifier
-            .padding(5.dp)
+            .padding(SCREEN_PADDING.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
+        //Seconds Blinking Outer Black Circle
         Box(contentAlignment = Alignment.Center) {
             Canvas(modifier = Modifier
-                .size(100.dp), onDraw = {
+                .size(CIRCLE_BOX.dp), onDraw = {
                 drawCircle(color = Color.Black)
             })
+            //Seconds Blinking Inner Circle
             Canvas(modifier = Modifier
-                .size(98.dp), onDraw = {
-                drawCircle(color = if (viewModel.secondMutable.value == 0) Color.Yellow else Color.White)
+                .size(CIRCLE_DIA.dp), onDraw = {
+                drawCircle(
+                    color = if (viewModel.secondMutable.value == 0) Color.Yellow else Color.White
+                )
             })
         }
 
 
         Spacer(modifier = Modifier.height(20.dp))
-        val whiteSpaceForBiggerBoxRow = (20 + 3 * 4).dp
-        val whiteSpaceForSmallBoxRow = (20 + 3 * 11).dp
+        val whiteSpaceForBiggerBoxRow = BIG_BOX_SPACE.dp
+        val whiteSpaceForSmallBoxRow = SMALL_BOX_SPACE.dp
         val configuration = LocalConfiguration.current
         val screenWidth = configuration.screenWidthDp.dp
-        val width4 = ((screenWidth.value - whiteSpaceForBiggerBoxRow.value) / 4).toInt();
-        val width11 = ((screenWidth.value - whiteSpaceForSmallBoxRow.value) / 11).toInt()
+        val widthBigBox =
+            ((screenWidth.value - whiteSpaceForBiggerBoxRow.value) / BIG_BOX_COUNT).toInt();
+        val widthSmallBox =
+            ((screenWidth.value - whiteSpaceForSmallBoxRow.value) / SMALL_BOX_COUNT).toInt()
 
-        DrawRow(charsList = viewModel.firstRowMutable.value, width4)
-        Spacer(modifier = Modifier.height(5.dp))
-        DrawRow(charsList = viewModel.secondRowMutable.value, width4)
-        Spacer(modifier = Modifier.height(5.dp))
+        //Hours 1st Row
+        DrawRow(charsList = viewModel.firstRowMutable.value, widthBigBox)
+        Spacer(modifier = Modifier.height(SCREEN_PADDING.dp))
 
-        //minutes Rows
-        DrawRow(charsList = viewModel.thirdRowMutable.value, width11)
-        Spacer(modifier = Modifier.height(5.dp))
-        DrawRow(charsList = viewModel.fourthRowMutable.value, width4)
+        //Hours 2nd Row
+        DrawRow(charsList = viewModel.secondRowMutable.value, widthBigBox)
+        Spacer(modifier = Modifier.height(SCREEN_PADDING.dp))
 
+        //minutes 1st Row
+        DrawRow(charsList = viewModel.thirdRowMutable.value, widthSmallBox)
+        Spacer(modifier = Modifier.height(SCREEN_PADDING.dp))
+        //minutes 2nd Row
+        DrawRow(charsList = viewModel.fourthRowMutable.value, widthBigBox)
+
+        //Digital Clock
         AndroidView(
             factory = { context ->
                 TextClock(context).apply {
-                    format12Hour?.let { this.format12Hour = "kk:mm" }
+                    format12Hour?.let { this.format12Hour = DIGITAL_CLOCK_FORMAT }
                     timeZone?.let { this.timeZone = it }
                     textSize.let { this.textSize = 50f }
                 }
             },
-            modifier = Modifier.padding(5.dp),
+            modifier = Modifier.padding(SCREEN_PADDING.dp),
         )
     }
 
@@ -116,13 +138,19 @@ fun EachRow(char: BoxColor, size: Int) {
     ) {
         Canvas(
             modifier = Modifier
-                .size(size.dp, 60.dp)
+                .size(size.dp, BOX_HEIGHT.dp)
                 .background(color = Color.Black)
-                .padding(2.dp),
+                .padding(OUTER_RECTANGLE_WIDTH.dp),
             onDraw = {
-                drawRect(color = if (char == BoxColor.RED) Color.Red else if (char == BoxColor.YELLOW) Color.Yellow else Color.White)
+                drawRect(
+                    color = when (char) {
+                        BoxColor.RED -> Color.Red
+                        BoxColor.YELLOW -> Color.Yellow
+                        else -> Color.White
+                    }
+                )
             })
-        Spacer(modifier = Modifier.padding(2.dp))
+        Spacer(modifier = Modifier.padding(BOX_PADDING.dp))
     }
 
 
