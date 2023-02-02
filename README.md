@@ -12,4 +12,9 @@ To run the app, use latest Android studio
 This app can run in physical device and emulator both.
 
 
+![Alt text](https://i.ibb.co/r6YGZ6T/Screenshot-20230202-182830.png "")
+
+
+
+
 
